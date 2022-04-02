@@ -81,6 +81,7 @@ func readactive(activeInput, activeOutput string) {
 
 	writer := csv.NewWriter(csvfile)
 	defer writer.Flush()
+	writer.Write([]string{"ASSET NAME", "ASSET TYPE", "TECHNOLOGIES", "PORT", "SERVICES", "TITLE"})
 
 	data := Data{}
 	// read json object line by line
@@ -90,7 +91,7 @@ func readactive(activeInput, activeOutput string) {
 			log.Fatal(err)
 		}
 		// store date at once
-		records := [][]string{{data.Input, "subdomain", (strings.Join(data.Technologies, "-")), data.Port, data.Scheme, data.Title}}
+		records := [][]string{{data.Input, "subdomain", (strings.Join(data.Technologies, ",")), data.Port, data.Scheme, data.Title}}
 		// dump data to csv
 		for _, record := range records {
 			err := writer.Write(record)

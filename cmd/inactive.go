@@ -72,6 +72,7 @@ func readinactive(inactiveInput, inactiveOutput string) {
 
 	writer := csv.NewWriter(csvfile)
 	defer writer.Flush()
+	writer.Write([]string{"ASSET NAME", "ASSET TYPE"})
 	// matching regex
 	ipv6_regex := `^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`
 	ipv4_regex := `^(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4})`
@@ -86,15 +87,15 @@ func readinactive(inactiveInput, inactiveOutput string) {
 		ipv6match, _ := regexp.MatchString(ipv6_regex, scanner.Text())
 		// check which conditions matches
 		if domainmatch {
-			data = append([]string{scanner.Text()}, "subdomain")
+			data = append([]string{scanner.Text()}, "SUBDOMAIN")
 		} else if ipv4match {
-			data = append([]string{scanner.Text()}, "IPv4 Address")
+			data = append([]string{scanner.Text()}, "IPv4 ADDRESS")
 		} else if ipv6match {
-			data = append([]string{scanner.Text()}, "IPv6 Address")
+			data = append([]string{scanner.Text()}, "IPv6 ADDRESS")
 		} else if err != nil {
 			log.Fatal(err)
 		} else {
-			data = append([]string{scanner.Text()}, "Uncategorized")
+			data = append([]string{scanner.Text()}, "UNCATIGORIZED")
 		}
 		// dumping data to csv
 		writer.Write(data)
