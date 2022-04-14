@@ -17,8 +17,9 @@ import (
 
 // inactiveCmd represents the inactive command
 var inactiveCmd = &cobra.Command{
-	Use:   "inactive",
-	Short: "Convert Inactive Subdomain File",
+	Use:     "inactive",
+	Short:   "Convert Inactive Subdomain File",
+	Example: `goasseter inactive --input inactive.txt --output inactive.json`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// get flag value
 		inactiveInput, _ := cmd.Flags().GetString("input")
@@ -39,16 +40,18 @@ var inactiveCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(inactiveCmd) // add this command to root command
 	// define flags
-	inactiveCmd.PersistentFlags().String("input", "", "Input File Location")
-	inactiveCmd.PersistentFlags().String("output", "", "Output File Location")
+	inactiveCmd.PersistentFlags().String("input", "", "(resolved.txt) Resolved Hosts File Location")
+	inactiveCmd.PersistentFlags().String("output", "", "(inactive.csv) CSV Output File Location")
 }
 
 func readinactive(inactiveInput, inactiveOutput string) {
+	fmt.Println("[+] Preparing Inactive Assets CSV output")
 	log.SetFlags(log.LstdFlags | log.Lshortfile) // get log location
 	// open file
 	f, err := os.Open(inactiveInput)
 	// check for errors
 	if err != nil {
+		fmt.Println("[-] Failed to read inactive input file!")
 		log.Fatal(err)
 	}
 	// remember to close the file at the end of the program
@@ -65,6 +68,7 @@ func readinactive(inactiveInput, inactiveOutput string) {
 	csvfile, err := os.OpenFile(OutputReportFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	// check for errors
 	if err != nil {
+		fmt.Println("[-] Failed to create new CSV input file!")
 		log.Fatal(err)
 		return
 	}
@@ -76,7 +80,7 @@ func readinactive(inactiveInput, inactiveOutput string) {
 	// matching regex
 	ipv6_regex := `^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`
 	ipv4_regex := `^(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4})`
-	domain_regex := `^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$`
+	domain_regex := `(?:[\Sa-z0-9A-Z](?:[\Sa-zA-Z0-9-]{0,61}[\Sa-zA-Z0-9])?\.)+[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]$`
 
 	// create loop to match line by line
 	for scanner.Scan() {
@@ -102,6 +106,7 @@ func readinactive(inactiveInput, inactiveOutput string) {
 	}
 	// check for errors
 	if err := scanner.Err(); err != nil {
+		fmt.Println("[-] Failed to prepare Inactive CSV file!")
 		log.Fatal(err)
 	}
 }

@@ -19,8 +19,9 @@ import (
 
 // activeCmd represents the active command
 var activeCmd = &cobra.Command{
-	Use:   "active",
-	Short: "Create Active Assset CSV from httpx JSON",
+	Use:     "active",
+	Short:   "Create Active Assset CSV from httpx JSON",
+	Example: `goasseter active --input httpx.json --output active.csv`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// gets flag value
 		activeInput, _ := cmd.Flags().GetString("input")
@@ -40,19 +41,23 @@ var activeCmd = &cobra.Command{
 
 func init() {
 	// define flags
-	activeCmd.PersistentFlags().String("input", "", "Input File Location")
-	activeCmd.PersistentFlags().String("output", "", "Output CSV File Location")
+	activeCmd.PersistentFlags().String("input", "", "(httpx.json) HTTPx JSON Output Location")
+	activeCmd.PersistentFlags().String("output", "", "(active.csv) Active Output CSV File Location")
 	rootCmd.AddCommand(activeCmd) // adds to root command
 }
 
 // json object values to store data
 type Data struct {
-	Url          string   `json:"url"`
-	Input        string   `json:"input"`
-	Technologies []string `json:"technologies"`
-	Port         string   `json:"port"`
-	Scheme       string   `json:"scheme"`
-	Title        string   `json:"title"`
+	Url          string      `json:"url"`
+	Input        string      `json:"input"`
+	Technologies []string    `json:"technologies"`
+	Port         string      `json:"port"`
+	Scheme       string      `json:"scheme"`
+	Title        string      `json:"title"`
+	StatusCode   json.Number `json:"status-code"`
+	Host         string      `json:"host"`
+	Length       json.Number `json:"content-length"`
+	Headers      string      `json:"headers"`
 }
 
 func readactive(activeInput, activeOutput string) {
