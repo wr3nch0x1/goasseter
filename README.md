@@ -18,3 +18,17 @@ goasseter active --input httpx_out.json --output active.csv
 ```
 goasseter active --input resolved.txt --output active.csv
 ```
+
+
+## For Screenshots Assets
+
+```
+goasseter screenshot --input httpx.json --output screenshot.json
+```
+
+
+## To run everything at once
+
+```
+goasseter onego --input resolved.txt
+```
