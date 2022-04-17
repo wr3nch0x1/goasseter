@@ -51,7 +51,7 @@ func init() {
 	// define flags
 	screenshotCmd.PersistentFlags().String("input", "", "(httpx.json) HTTPx JSON File Location")
 	screenshotCmd.PersistentFlags().String("output", "", "(screenshots.json) Output JSON File Location")
-	screenshotCmd.PersistentFlags().Int("delay", 5, "Number of second to dalay the screenshot capture to let CSS animations load)")
+	screenshotCmd.PersistentFlags().Int("delay", 5, "Number of second to dalay the screenshot capture to let CSS animations load")
 	rootCmd.AddCommand(screenshotCmd) // adds to root command
 }
 
@@ -102,7 +102,7 @@ func createJSON(inputFile, outFile string, delay int) {
 	//open input file
 	jsonFile, err := os.Open(inputFile) //open input file
 	if err != nil {
-		log.Fatal(err)
+		log.Println("[!] Failed to Open Input File:", err)
 	}
 	//read data
 	jsonData := bufio.NewScanner(jsonFile) // by default handles 4MB data only
@@ -116,7 +116,7 @@ func createJSON(inputFile, outFile string, delay int) {
 	for jsonData.Scan() {
 		// marshal json data & check for logs
 		if err := json.Unmarshal(jsonData.Bytes(), &data); err != nil {
-			log.Fatal(err)
+			log.Println("[!] Failed to marhsal JSON data:", err)
 		}
 		// store date at once
 		abc, cancel := chromedp.NewContext(context.Background())
@@ -154,7 +154,6 @@ func createJSON(inputFile, outFile string, delay int) {
 			write2file(outFile, file)
 		}
 	}
-
 	// check for logs
 	if jsonData.Err() != nil {
 		log.Fatal(err)
@@ -178,4 +177,19 @@ func write2file(outFile string, file []byte) {
 	if _, err = f.WriteString("\n"); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func recoverHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Printf("panic: %+v", err)
+				http.Error(w, http.StatusText(500), 500)
+			}
+		}()
+
+		next.ServeHTTP(w, r)
+	}
+
+	return http.HandlerFunc(fn)
 }
