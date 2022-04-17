@@ -29,6 +29,8 @@ var onegoCmd = &cobra.Command{
 			RunHTTPx(inactiveInput)
 			readactive("onego_httpx.json", "onego_active_output.csv")
 			createJSON("onego_httpx.json", "onego_screenshots_output.json", 3)
+			removeFile("onego_ipmap.json")
+			readIPfromJSON("onego_httpx.json", "onego_ipmap.json", 3)
 			fmt.Println("Execution Completed!")
 		} else {
 			fmt.Println("\n[-] Please specify input file")
