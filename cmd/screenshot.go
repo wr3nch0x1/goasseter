@@ -79,27 +79,34 @@ func screenshotTasks(url string, imageBuf *[]byte, delay int) chromedp.Tasks { /
 func headersTasks(url string, delay int) string { //get http resp headers using http/net package
 	log.SetFlags(log.LstdFlags | log.Lshortfile) // gets error line
 
-	// client := http.Client{
-	// 	Timeout: time.Duration(delay) * time.Second,
-	// 	CheckRedirect: func(req *http.Request, via []*http.Request) error {
-	// 		return http.ErrUseLastResponse
-	// 	},
-	// }
+	client := http.Client{
+		Timeout: time.Duration(delay) * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //ignore bad ssl certification
 
-	// resp, err := client.Get(url) //make http req
-	// if err != nil {
-	// 	log.Println(nil, err)
-	// }
-	// defer resp.Body.Close() //close once done
-
-	resp, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	resp.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12")
+
+	resp, err := client.Do(req) //make http req
+	if err != nil {
+		log.Println(nil, err)
+	}
+	defer resp.Body.Close() //close once done
+
+	// resp, err := http.NewRequest(http.MethodGet, url, nil)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// resp.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12")
 	// defer resp.Body.Close() //close once done
 
+	// fmt.Println(resp.Header)
 	repRes := new(bytes.Buffer) //create emptybuffer
 	// fmt.Println(url, resp.StatusCode)
 	for key, value := range resp.Header { //store http headers into buffer
@@ -129,8 +136,15 @@ func createJSON(inputFile, outFile string, delay int) {
 		if err := json.Unmarshal(jsonData.Bytes(), &data); err != nil {
 			log.Println("[!] Failed to marhsal JSON data:", err)
 		}
-		// store date at once
-		abc, cancel := chromedp.NewContext(context.Background())
+		// ignore ssl cert while taking screenshots
+		opts := append(chromedp.DefaultExecAllocatorOptions[:],
+			chromedp.Flag("ignore-certificate-errors", "1"),
+		)
+		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+		defer cancel()
+
+		abc, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(log.Printf))
+		//abc, cancel := chromedp.NewContext(context.Background())
 		defer cancel()
 
 		var imageBuf []byte //create byte array to store image data
