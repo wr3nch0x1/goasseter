@@ -38,7 +38,7 @@ var screenshotCmd = &cobra.Command{
 			removeFile(activeOutput)
 			createJSON(activeInput, activeOutput, delay)
 		} else if activeInput != "" && activeOutput == "" {
-			fmt.Print("Missing Flag: Use --output <output-file.csv>\n")
+			fmt.Print("Missing Flag: Use --output <output-file.json>\n")
 		} else if activeInput == "" && activeOutput != "" {
 			fmt.Print("Missing Flag: Use --input <input-file.json>\n")
 		} else {

@@ -40,7 +40,7 @@ var ipmapCmd = &cobra.Command{
 			removeFile(activeOutput)
 			readIPfromJSON(activeInput, activeOutput, timeout)
 		} else if activeInput != "" && activeOutput == "" {
-			fmt.Print("Missing Flag: Use --output <output-file.csv>\n")
+			fmt.Print("Missing Flag: Use --output <output-file.json>\n")
 		} else if activeInput == "" && activeOutput != "" {
 			fmt.Print("Missing Flag: Use --input <input-file.json>\n")
 		} else {
