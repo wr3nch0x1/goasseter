@@ -45,7 +45,7 @@ func init() {
 	rootCmd.AddCommand(onegoCmd)
 }
 
-func RunHTTPx(inactiveInput string) {
+func RunHTTPx(inactiveInput string) error {
 
 	execname := "httpx"
 
@@ -64,7 +64,10 @@ func RunHTTPx(inactiveInput string) {
 	// fmt.Println(out.String()) //this is to show output for debugging
 
 	stderr, _ := cmd.StderrPipe()
-	cmd.Start()
+	err := cmd.Start()
+	if err != nil {
+		return err
+	}
 
 	scanner := bufio.NewScanner(stderr)
 	scanner.Split(bufio.ScanLines)
@@ -74,4 +77,5 @@ func RunHTTPx(inactiveInput string) {
 	}
 	cmd.Wait()
 	fmt.Println("[+] HTTPx Completed and Output stored in: onego_httpx.json")
+	return err
 }
