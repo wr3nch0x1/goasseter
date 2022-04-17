@@ -64,11 +64,11 @@ type NewData struct {
 	Imgdata      string `json:"imgdata"`
 }
 
-func screenshotTasks(url string, imageBuf *[]byte) chromedp.Tasks { // use chromdp package to take screenshot
+func screenshotTasks(url string, imageBuf *[]byte, delay int) chromedp.Tasks { // use chromdp package to take screenshot
 	log.SetFlags(log.LstdFlags | log.Lshortfile) // gets error line
 	return chromedp.Tasks{
 		chromedp.Navigate(url),
-		chromedp.Sleep(time.Duration(5) * time.Second), // wait for 5 second before taking screenshot (to let animation loads)
+		chromedp.Sleep(time.Duration(delay) * time.Second), // wait for 5 second before taking screenshot (to let animation loads)
 		chromedp.ActionFunc(func(abc context.Context) (err error) {
 			*imageBuf, err = page.CaptureScreenshot().Do(abc) // take screenshot in png and store in buffer
 			return err
@@ -135,7 +135,7 @@ func createJSON(inputFile, outFile string, delay int) {
 
 		var imageBuf []byte //create byte array to store image data
 
-		chromedp.Run(abc, screenshotTasks(data.Url, &imageBuf))
+		chromedp.Run(abc, screenshotTasks(data.Url, &imageBuf, delay))
 		if err != nil {
 			fmt.Println("[!] Failed to take screenshot of: ", data.Url)
 		}
