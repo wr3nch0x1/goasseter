@@ -51,7 +51,7 @@ func init() {
 	// define flags
 	screenshotCmd.PersistentFlags().String("input", "", "(httpx.json) HTTPx JSON File Location")
 	screenshotCmd.PersistentFlags().String("output", "", "(screenshots.json) Output JSON File Location")
-	screenshotCmd.PersistentFlags().Int("delay", 5, "Number of second to dalay the screenshot capture to let CSS animations load")
+	screenshotCmd.PersistentFlags().Int("delay", 3, "Number of second to dalay the screenshot capture to let CSS animations load")
 	rootCmd.AddCommand(screenshotCmd) // adds to root command
 }
 
@@ -80,7 +80,7 @@ func headersTasks(url string, delay int) string { //get http resp headers using 
 	log.SetFlags(log.LstdFlags | log.Lshortfile) // gets error line
 
 	client := http.Client{
-		Timeout: time.Duration(delay) * time.Second,
+		// Timeout: time.Duration(delay) * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
@@ -94,9 +94,15 @@ func headersTasks(url string, delay int) string { //get http resp headers using 
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12")
 
 	resp, err := client.Do(req) //make http req
-	if err != nil {
+	if err != nil || resp == nil {
 		log.Println(nil, err)
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("[-] FAILED to get Headers for: %+v\n", req.URL)
+			fmt.Printf("[-] Panic Error: %+v\n", r)
+		}
+	}()
 	defer resp.Body.Close() //close once done
 
 	// resp, err := http.NewRequest(http.MethodGet, url, nil)
