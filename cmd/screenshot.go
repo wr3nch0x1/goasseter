@@ -79,16 +79,27 @@ func screenshotTasks(url string, imageBuf *[]byte) chromedp.Tasks { // use chrom
 func headersTasks(url string, delay int) string { //get http resp headers using http/net package
 	log.SetFlags(log.LstdFlags | log.Lshortfile) // gets error line
 
-	client := http.Client{
-		Timeout: time.Duration(delay) * time.Second,
-	}
+	// client := http.Client{
+	// 	Timeout: time.Duration(delay) * time.Second,
+	// 	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+	// 		return http.ErrUseLastResponse
+	// 	},
+	// }
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //ignore bad ssl certification
 
-	resp, err := client.Get(url) //make http req
+	// resp, err := client.Get(url) //make http req
+	// if err != nil {
+	// 	log.Println(nil, err)
+	// }
+	// defer resp.Body.Close() //close once done
+
+	resp, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		log.Println("[-] Failed to connect: ", err)
+		log.Fatal(err)
 	}
-	defer resp.Body.Close()     //close once done
+	resp.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12")
+	// defer resp.Body.Close() //close once done
+
 	repRes := new(bytes.Buffer) //create emptybuffer
 	// fmt.Println(url, resp.StatusCode)
 	for key, value := range resp.Header { //store http headers into buffer
@@ -177,19 +188,4 @@ func write2file(outFile string, file []byte) {
 	if _, err = f.WriteString("\n"); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func recoverHandler(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				log.Printf("panic: %+v", err)
-				http.Error(w, http.StatusText(500), 500)
-			}
-		}()
-
-		next.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
 }
