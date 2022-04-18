@@ -65,10 +65,9 @@ type NewData struct {
 }
 
 func screenshotTasks(url string, imageBuf *[]byte, delay int) chromedp.Tasks { // use chromdp package to take screenshot
-	log.SetFlags(log.LstdFlags | log.Lshortfile) // gets error line
 	return chromedp.Tasks{
 		chromedp.Navigate(url),
-		chromedp.Sleep(time.Duration(delay) * time.Second), // wait for 5 second before taking screenshot (to let animation loads)
+		chromedp.Sleep(time.Duration(delay) * time.Second), // wait for n second before taking screenshot (to let animation loads)
 		chromedp.ActionFunc(func(abc context.Context) (err error) {
 			*imageBuf, err = page.CaptureScreenshot().Do(abc) // take screenshot in png and store in buffer
 			return err
@@ -144,12 +143,21 @@ func createJSON(inputFile, outFile string, delay int) {
 		}
 		// ignore ssl cert while taking screenshots
 		opts := append(chromedp.DefaultExecAllocatorOptions[:],
-			chromedp.Flag("ignore-certificate-errors", "1"),
+			chromedp.Flag("headless", true),
+			chromedp.Flag("ignore-certificate-errors", true),
+			chromedp.Flag("disable-gpu", true),
+			chromedp.Flag("enable-automation", true),
+			chromedp.Flag("disable-extensions", true),
+			chromedp.Flag("disable-setuid-sandbox", true),
+			chromedp.Flag("disable-web-security", true),
+			chromedp.Flag("no-first-run", true),
+			chromedp.Flag("no-default-browser-check", true),
 		)
 		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 		defer cancel()
 
 		abc, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(log.Printf))
+		// abc, cancel = context.WithTimeout(abc, time.Duration(delay)*time.Second)
 		//abc, cancel := chromedp.NewContext(context.Background())
 		defer cancel()
 
